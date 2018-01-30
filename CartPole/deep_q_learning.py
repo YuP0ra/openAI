@@ -24,6 +24,7 @@ loss = tf.losses.mean_squared_error(predictions=out_1, labels=q_holder)
 update = tf.train.AdamOptimizer(learning_rate).minimize(loss)
 
 env = gym.make('CartPole-v0')
+env._max_episode_steps = ep_length
 
 with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
@@ -36,12 +37,11 @@ with tf.Session() as sess:
     fi_x, fi_y = np.zeros(shape=[1, 4]), np.zeros(shape=[1, 2])
 
     r_all = 0
-    render = False
     for e in range(episodes):
         s = env.reset()
 
         for j in range(ep_length):
-            if render:
+            if e % 99 == 0:
                 env.render()
 
             a_p = sess.run([out_1], feed_dict={states_holder: [s]})[0][0]
@@ -58,6 +58,7 @@ with tf.Session() as sess:
             next_state, rewards_buffer[j], done, _ = env.step(chosen_action)
 
             r_all += rewards_buffer[j]
+            rewards_buffer[j] = rewards_buffer[j] / (1. + np.abs(s[0]))
             if done or j == ep_length - 1:
                 s = j
                 break
@@ -73,6 +74,4 @@ with tf.Session() as sess:
 
         if e % 99 == 0:
             print(r_all)
-            if r_all > 19000:
-                render = True
             r_all = 0
