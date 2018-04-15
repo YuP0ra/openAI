@@ -23,7 +23,7 @@ out_1 = tf.matmul(out_0, weights_1) + biases_1
 loss = tf.losses.mean_squared_error(predictions=out_1, labels=q_holder)
 update = tf.train.AdamOptimizer(learning_rate).minimize(loss)
 
-env = gym.make('CartPole-v0')
+env = gym.make('CartPole Tensorflow-v0')
 env._max_episode_steps = ep_length
 
 with tf.Session() as sess:
@@ -41,9 +41,6 @@ with tf.Session() as sess:
         s = env.reset()
 
         for j in range(ep_length):
-            if e % 99 == 0:
-                env.render()
-
             a_p = sess.run([out_1], feed_dict={states_holder: [s]})[0][0]
 
             if np.random.ranf() < 0.2:
